@@ -1,92 +1,347 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redz Hub – Script Copy Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REDZ HUB — Script Copy Page</title>
+
+  <!-- ====== CORE STYLES ================================================= -->
   <style>
-    :root { --bg-dark:#0e0e0e; --accent-cyan:#00ffff; --accent-purple:#7b2cff; --text-main:#f1f1f1; --neon-shadow:0 0 6px var(--accent-cyan),0 0 12px var(--accent-purple); }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Segoe UI',sans-serif;background:var(--bg-dark);color:var(--text-main);display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;}
-    #particle-canvas{position:fixed;inset:0;z-index:-1;}
-    header{display:flex;align-items:center;justify-content:center;padding:20px;background:#1a1a1a;border-bottom:2px solid var(--accent-purple);animation:fadeDown 1s ease forwards;}
-    header img{height:50px;margin-right:10px;filter:drop-shadow(var(--neon-shadow));}
-    header h1{font-size:22px;color:var(--accent-purple);}
-    .container{padding:15px;display:flex;flex-direction:column;gap:20px;flex:1;}
-    .card{display:flex;flex-direction:row;align-items:flex-start;gap:20px;background:#1c1c1c;border-radius:10px;border:1px solid #333;box-shadow:0 0 5px rgba(123,44,255,0.2);padding:15px;position:relative;animation:fadeUp 1s ease .3s forwards;opacity:0;}
-    .card.fadeIn{opacity:1;}
-    .script-img{width:150px;border-radius:8px;flex-shrink:0;animation:fadeIn 1s ease .5s both;transition:transform .3s;}
-    .script-img:hover{transform:scale(1.05);}
-    .script-content{flex:1;display:flex;flex-direction:column;}
-    .card h2{color:var(--accent-cyan);font-size:18px;margin-bottom:10px;}
-    .script-box{width:100%;resize:none;background:#111;border:1px solid #444;border-radius:6px;font-family:monospace;font-size:14px;color:#00bfff;padding:10px;box-sizing:border-box;height:140px;}
-    .copy-btn{background:var(--accent-purple);color:#fff;border:none;padding:10px;border-radius:6px;font-weight:bold;cursor:pointer;align-self:flex-end;margin-top:10px;transition:background .3s;}
-    .copy-btn:hover{background:#a35eff;}
-    #toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,20px);background:var(--accent-cyan);color:#000;padding:8px 16px;border-radius:6px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:10;}
-    #toast.show{opacity:1;transform:translate(-50%,0);}
-    footer{text-align:center;padding:15px;background:#1a1a1a;border-top:1px solid #333;}
-    footer img{height:30px;margin-top:10px;border-radius:50%;filter:drop-shadow(var(--neon-shadow));}
-    footer span{display:block;color:var(--accent-cyan);font-weight:600;margin-top:5px;}
-    @keyframes fadeDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:none;}}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
-    @media(max-width:800px){.card{flex-direction:column;align-items:center;} .script-img{width:100px;} .script-box{height:120px;}}
+    :root {
+      --bg-1: #0e0e0e;
+      --bg-2: #1c1c1c;
+      --bg-3: #282828;
+      --accent-cyan: #00ffff;
+      --accent-purple: #7b2cff;
+      --text-main: #f1f1f1;
+      --overlay: rgba(0, 0, 0, 0.85);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-1);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* animated background gradient */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(
+        at 20% 20%,
+        var(--accent-purple),
+        transparent 50%
+      ),
+      radial-gradient(at 80% 80%, var(--accent-cyan), transparent 55%);
+      animation: move 15s linear infinite;
+      opacity: 0.07;
+      pointer-events: none;
+    }
+
+    @keyframes move {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-20%, -10%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 10px;
+      background: var(--bg-3);
+      border-bottom: 2px solid var(--accent-purple);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    header img {
+      height: 60px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent-purple);
+      text-shadow: 0 0 6px rgba(123, 44, 255, 0.6);
+      letter-spacing: 1px;
+    }
+
+    /* ---------------------- main card ---------------------- */
+    .container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 26px 12px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 640px;
+      background: var(--bg-2);
+      border-radius: 14px;
+      padding: 28px 24px 32px;
+      text-align: center;
+      box-shadow: 0 6px 24px rgba(0, 255, 255, 0.22);
+      transition: transform 0.3s ease;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .card:hover { transform: translateY(-6px) scale(1.02); }
+
+    .card img {
+      width: 90%;
+      max-width: 360px;
+      height: auto;
+      border-radius: 10px;
+      margin: 0 auto;
+      display: block;
+      cursor: pointer;
+      transition: transform 0.35s;
+    }
+
+    .card img:hover { transform: scale(1.05); }
+
+    .card h2 {
+      margin: 22px 0 18px;
+      font-size: 24px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      background: var(--accent-purple);
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+      padding: 14px 32px;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(123, 44, 255, 0.35);
+      transition: background 0.25s;
+    }
+
+    .btn:hover { background: #9a54ff; }
+
+    /* toast */
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 34px;
+      transform: translateX(-50%);
+      background: var(--accent-cyan);
+      color: #061414;
+      padding: 12px 26px;
+      border-radius: 8px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s;
+      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.35);
+    }
+
+    #toast.show { opacity: 1; }
+
+    /* modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--overlay);
+      backdrop-filter: blur(4px);
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+      z-index: 50;
+    }
+
+    .modal.open { visibility: visible; opacity: 1; }
+
+    .modal-content {
+      background: #111;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 760px;
+      padding: 28px 26px 32px;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+      animation: scaleIn 0.45s ease forwards;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-content img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: #1a1a1a;
+      color: #0f0;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: "Consolas", monospace;
+      resize: none;
+      box-shadow: inset 0 4px 14px rgba(0, 255, 255, 0.25);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      font-size: 30px;
+      color: var(--text-main);
+      cursor: pointer;
+      line-height: 1;
+      transition: transform 0.25s;
+    }
+
+    .close-btn:hover { transform: rotate(90deg); }
+
+    footer {
+      background: var(--bg-3);
+      text-align: center;
+      padding: 18px 10px 26px;
+      border-top: 1px solid #333;
+      box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    footer img {
+      height: 42px;
+      border-radius: 50%;
+    }
+
+    footer span {
+      display: block;
+      margin-top: 8px;
+      color: var(--accent-cyan);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 22px 18px 28px; }
+      .card h2 { font-size: 22px; }
+      .btn { padding: 12px 26px; }
+      header h1 { font-size: 23px; }
+    }
   </style>
 </head>
+
 <body>
-  <canvas id="particle-canvas"></canvas>
-  <div id="toast">Copiado!</div>
   <header>
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10" alt="Logo Redz Hub">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10" alt="Logo Redz Hub" />
     <h1>REDZ HUB</h1>
   </header>
-  <div class="container">
-    <div class="card" id="card">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10" alt="Script Image" class="script-img">
-      <div class="script-content">
-        <h2>Script Blox Fruits</h2>
-        <textarea id="script-box" class="script-box" readonly>-- Official Redz
+
+  <main class="container">
+    <article class="card">
+      <img
+        id="open-modal"
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10"
+        alt="Script Cover"
+      />
+      <h2>Script Blox Fruits</h2>
+      <button class="btn" id="copy-script">Copiar Script</button>
+    </article>
+  </main>
+
+  <footer>
+    <img src="https://i.ibb.co/90LZhz3/download-38.jpg" alt="Avatar Lures" />
+    <span>É o Lures</span>
+  </footer>
+
+  <!-- ====================== MODAL ===================================== -->
+  <section class="modal" id="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close-modal">&times;</span>
+
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10"
+        alt="Preview Script"
+      />
+
+      <textarea id="modal-script" readonly>
+-- Official Redz
 local Settings = {
   JoinTeam   = "Pirates"; -- Pirates/Marines
   Translator = true;      -- true/false
 }
-loadstring(game:HttpGet("https://raw.githubusercontent.com/newredz/BloxFruits/main/Source.luau"))(Settings)</textarea>
-        <button class="copy-btn" id="copy-btn">COPIAR</button>
-      </div>
+loadstring(game:HttpGet("https://raw.githubusercontent.com/newredz/BloxFruits/main/Source.luau"))(Settings)
+      </textarea>
+
+      <button class="btn" id="modal-copy">Copiar</button>
     </div>
-  </div>
-  <footer>
-    <img src="https://i.ibb.co/90LZhz3/download-38.jpg" alt="Avatar Lures">
-    <span>É o Lures</span>
-  </footer>
+  </section>
+
+  <div id="toast"></div>
+
+  <!-- ====================== JS ======================================== -->
   <script>
-    // Fade in card
-    window.addEventListener('load', () => document.getElementById('card').classList.add('fadeIn'));
-    const copyBtn = document.getElementById('copy-btn');
-    const scriptBox = document.getElementById('script-box');
-    const toast = document.getElementById('toast');
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 1500);
+    /* ---------- TOAST ---------- */
+    const toast = document.getElementById("toast");
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1600);
     }
-    copyBtn.addEventListener('click', () => {
-      scriptBox.select();
-      if (document.execCommand('copy')) {
-        copyBtn.textContent = 'COPIADO!';
-        showToast('Script copiado!');
-        setTimeout(() => copyBtn.textContent = 'COPIAR', 1500);
-      } else {
-        showToast('Falha ao copiar');
+
+    /* ---------- CLIPBOARD COPY ---------- */
+    const scriptText = document.getElementById("modal-script");
+
+    async function copyScript() {
+      try {
+        await navigator.clipboard.writeText(scriptText.value.trim());
+        showToast("Script copiado!");
+      } catch (err) {
+        console.error(err);
+        showToast("Falha ao copiar");
       }
+    }
+
+    document
+      .getElementById("copy-script")
+      .addEventListener("click", copyScript);
+    document
+      .getElementById("modal-copy")
+      .addEventListener("click", copyScript);
+
+    /* ---------- MODAL ----------- */
+    const modal = document.getElementById("modal");
+    document
+      .getElementById("open-modal")
+      .addEventListener("click", () => modal.classList.add("open"));
+    document
+      .getElementById("close-modal")
+      .addEventListener("click", () => modal.classList.remove("open"));
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("open");
     });
-    // Particle background
-    const canvas = document.getElementById('particle-canvas');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
-    function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
-    window.addEventListener('resize',resize);resize();
-    for(let i=0;i<120;i++){stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,v:Math.random()*0.5+0.1});}
-    (function anim(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='rgba(0,255,255,0.8)';stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();s.y+=s.v;if(s.y>canvas.height){s.y=0;s.x=Math.random()*canvas.width;}});requestAnimationFrame(anim);})();
   </script>
 </body>
 </html>
