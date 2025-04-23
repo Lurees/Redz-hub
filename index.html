@@ -16,15 +16,6 @@
       min-height: 100vh;
       margin: 0;
     }
-
-    img {
-      max-width: 90%;
-      height: auto;
-      margin: 20px 0;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,255,255,0.15);
-    }
-
     .script-container {
       background-color: #1a1a1a;
       border: 1px solid #333;
@@ -35,13 +26,11 @@
       box-shadow: 0 0 15px rgba(0,255,255,0.2);
       margin-top: 30px;
     }
-
     .script-title {
       font-size: 24px;
       margin-bottom: 20px;
       text-align: center;
     }
-
     .script-box {
       background-color: #0d0d0d;
       color: #00ffff;
@@ -53,7 +42,6 @@
       word-wrap: break-word;
       margin-bottom: 20px;
     }
-
     .copy-button {
       background-color: #6c28f5;
       color: white;
@@ -64,21 +52,12 @@
       cursor: pointer;
       transition: 0.2s ease;
     }
-
     .copy-button:hover {
       background-color: #5320cc;
-    }
-
-    footer {
-      margin-top: 40px;
-      text-align: center;
     }
   </style>
 </head>
 <body>
-  <!-- Imagem do topo -->
-  <img src="https://i.ibb.co/svVQKgFJ/download-37.jpg" alt="Imagem do Script Blox Fruits">
-
   <div class="script-container">
     <div class="script-title">Script Blox Fruits</div>
     <div class="script-box" id="scriptBox">
@@ -90,11 +69,6 @@ local Settings = {
     </div>
     <button class="copy-button" onclick="copyScript()">COPIAR</button>
   </div>
-
-  <!-- Imagem do rodapé -->
-  <footer>
-    <img src="https://i.ibb.co/svVQKgFJ/download-37.jpg" alt="Logo Final">
-  </footer>
 
   <script>
     function copyScript() {
