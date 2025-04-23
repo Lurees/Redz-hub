@@ -1,85 +1,84 @@
-<!DOCTYPE html><html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redz Hub – Script Copy Page</title>
   <style>
-    :root { --bg-dark:#0e0e0e; --accent-cyan:#00ffff; --accent-purple:#7b2cff; --text-main:#f1f1f1; --overlay-bg:rgba(0,0,0,0.8); }
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Segoe UI',sans-serif;background:var(--bg-dark);color:var(--text-main);display:flex;flex-direction:column;min-height:100vh;}
+    :root { --bg-dark:#0e0e0e; --accent-cyan:#00ffff; --accent-purple:#7b2cff; --text-main:#f1f1f1; --neon-shadow:0 0 6px var(--accent-cyan),0 0 12px var(--accent-purple); }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg-dark);color:var(--text-main);display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;}
+    #particle-canvas{position:fixed;inset:0;z-index:-1;}
     header{display:flex;align-items:center;justify-content:center;padding:20px;background:#1a1a1a;border-bottom:2px solid var(--accent-purple);}
-    header img{height:50px;margin-right:10px;}
+    header img{height:50px;margin-right:10px;filter:drop-shadow(var(--neon-shadow));}
     header h1{font-size:22px;color:var(--accent-purple);}
-    .container{flex:1;padding:15px;display:flex;justify-content:center;align-items:center;}
-    .card{background:#1c1c1c;border-radius:10px;box-shadow:0 0 10px rgba(0,255,255,0.3);padding:20px;max-width:600px;width:100%;text-align:center;}
-    .card img{width:200px;border-radius:8px;cursor:pointer;transition:transform .3s;}
-    .card img:hover{transform:scale(1.05);}
-    .card h2{margin:15px 0;color:var(--accent-cyan);font-size:20px;}
-    .card .copy-btn{background:var(--accent-purple);color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;transition:background .3s;}
-    .card .copy-btn:hover{background:#a35eff;}
-    #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--accent-cyan);color:#000;padding:8px 16px;border-radius:6px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s;}
-    #toast.show{opacity:1;}
+    .container{padding:15px;display:flex;flex-direction:column;gap:20px;flex:1;}
+    .card{display:flex;gap:20px;flex-wrap:wrap;background:#1c1c1c;border-radius:10px;border:1px solid #333;box-shadow:0 0 5px rgba(123,44,255,0.2);padding:15px;position:relative;}
+    .script-img{width:100px;height:100px;object-fit:cover;border-radius:8px;align-self:center;}
+    .script-content{flex:1;display:flex;flex-direction:column;}
+    .card h2{color:var(--accent-cyan);font-size:18px;margin-bottom:10px;}
+    .script-box{width:100%;resize:none;background:#111;border:1px solid #444;border-radius:6px;font-family:monospace;font-size:14px;color:#00bfff;padding:10px;box-sizing:border-box;height:120px;}
+    .copy-btn{background:var(--accent-purple);color:#fff;border:none;padding:10px;border-radius:6px;font-weight:bold;cursor:pointer;align-self:flex-end;margin-top:10px;transition:background .3s;}
+    .copy-btn:hover{background:#a35eff;}
+    #toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,20px);background:var(--accent-cyan);color:#000;padding:8px 16px;border-radius:6px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;z-index:10;}
+    #toast.show{opacity:1;transform:translate(-50%,0);}
     footer{text-align:center;padding:15px;background:#1a1a1a;border-top:1px solid #333;}
-    footer img{height:30px;border-radius:50%;margin-top:10px;}
-    footer span{display:block;color:var(--accent-cyan);margin-top:5px;}
-    /* Modal */
-    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:var(--overlay-bg);justify-content:center;align-items:center;}
-    .modal-content{background:#111;border-radius:8px;padding:20px;max-width:700px;width:90%;position:relative;animation:fadeIn .4s ease forwards;}
-    .modal-content img{width:100%;max-height:200px;object-fit:cover;border-radius:6px;margin-bottom:15px;}
-    .modal-content textarea{width:100%;height:150px;background:#222;color:#0f0;border:none;padding:10px;font-family:monospace;border-radius:6px;resize:none;}
-    .modal-content button{background:var(--accent-purple);color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;margin-top:10px;}
-    .modal-content button:hover{background:#a35eff;}
-    .close-btn{position:absolute;top:10px;right:15px;font-size:24px;color:#fff;cursor:pointer;}
-    @keyframes fadeIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+    footer img{height:30px;margin-top:10px;border-radius:50%;filter:drop-shadow(var(--neon-shadow));}
+    footer span{display:block;color:var(--accent-cyan);font-weight:600;margin-top:5px;}
+    @media(max-width:600px){.card{flex-direction:column;align-items:center;} .script-img{width:80px;height:80px;} .script-box{height:100px;}}
   </style>
 </head>
 <body>
+  <canvas id="particle-canvas"></canvas>
+  <div id="toast">Copiado!</div>
   <header>
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10" alt="Logo Redz Hub">
     <h1>REDZ HUB</h1>
   </header>
   <div class="container">
     <div class="card">
-      <img id="open-modal" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10" alt="Script Image">
-      <h2>Script Blox Fruits</h2>
-      <button class="copy-btn" id="copy-script">Copiar Script</button>
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10" alt="Script Image" class="script-img">
+      <div class="script-content">
+        <h2>Script Blox Fruits</h2>
+        <textarea id="script-box" class="script-box" readonly>-- Official Redz
+local Settings = {
+  JoinTeam   = "Pirates"; -- Pirates/Marines
+  Translator = true;      -- true/false
+}
+loadstring(game:HttpGet("https://raw.githubusercontent.com/newredz/BloxFruits/main/Source.luau"))(Settings)</textarea>
+        <button class="copy-btn" id="copy-btn">COPIAR</button>
+      </div>
     </div>
   </div>
   <footer>
     <img src="https://i.ibb.co/90LZhz3/download-38.jpg" alt="Avatar Lures">
     <span>É o Lures</span>
   </footer>
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <span class="close-btn" id="close-modal">&times;</span>
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLWzN26mXh2uVDkjHlor4BRAhxyZiGDFztG_em0UDhGkZf6dzbBpz6OVRX&s=10" alt="Script">
-      <textarea id="modal-script" readonly>-- Official Redz
-local Settings = {
-  JoinTeam   = "Pirates"; -- Pirates/Marines
-  Translator = true;      -- true/false
-}
-loadstring(game:HttpGet("https://raw.githubusercontent.com/newredz/BloxFruits/main/Source.luau"))(Settings)</textarea>
-      <button id="modal-copy">Copiar</button>
-    </div>
-  </div>
-  <div id="toast"></div>
   <script>
+    const copyBtn = document.getElementById('copy-btn');
+    const scriptBox = document.getElementById('script-box');
     const toast = document.getElementById('toast');
-    function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1500);}// Copy functions
-const scriptText = document.getElementById('modal-script');
-function copyText(el){el.select();document.execCommand('copy');}
-
-document.getElementById('copy-script').addEventListener('click',()=>{ copyText(scriptText); showToast('Script copiado!'); });
-document.getElementById('modal-copy').addEventListener('click',()=>{ copyText(scriptText); showToast('Script copiado!'); });
-
-// Modal open/close
-const modal = document.getElementById('modal');
-document.getElementById('open-modal').addEventListener('click',()=>{ modal.style.display='flex'; });
-document.getElementById('close-modal').addEventListener('click',()=>{ modal.style.display='none'; });
-window.addEventListener('click',e=>{ if(e.target===modal) modal.style.display='none'; });
-
-// Particle canvas omitted for brevity
-
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+    copyBtn.addEventListener('click', () => {
+      scriptBox.select();
+      if(document.execCommand('copy')){
+        copyBtn.textContent='COPIADO!';
+        showToast('Script copiado!');
+        setTimeout(()=>copyBtn.textContent='COPIAR',1500);
+      } else showToast('Falha ao copiar');
+    });
+    // Particle
+    const canvas=document.getElementById('particle-canvas');
+    const ctx=canvas.getContext('2d');
+    let stars=[];
+    function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+    window.addEventListener('resize',resize);resize();
+    for(let i=0;i<120;i++){stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,v:Math.random()*0.5+0.1});}
+    (function anim(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='rgba(0,255,255,0.8)';stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();s.y+=s.v;if(s.y>canvas.height){s.y=0;s.x=Math.random()*canvas.width;}});requestAnimationFrame(anim);})();
   </script>
 </body>
 </html>
